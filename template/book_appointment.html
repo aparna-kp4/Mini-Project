@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Book Appointment</title>
+    <style>
+        /* General page styling */
+        body {
+            font-family: 'Arial', sans-serif;
+            background-color: #f0f4f8;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            justify-content: center;
+            min-height: 100vh;
+        }
+
+        /* Container for the form */
+        .container {
+            background-color: #fff;
+            padding: 30px 40px;
+            margin: 50px 0;
+            border-radius: 12px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+            width: 90%;
+            max-width: 600px;
+        }
+
+        /* Headings */
+        h2 {
+            text-align: center;
+            color: #333;
+            margin-bottom: 20px;
+        }
+
+        h3 {
+            color: #007BFF;
+            margin-top: 20px;
+            margin-bottom: 10px;
+        }
+
+        /* Slot list styling */
+        ul {
+            list-style: none;
+            padding-left: 0;
+        }
+
+        li {
+            background-color: #f8f9fa;
+            margin-bottom: 10px;
+            padding: 12px 15px;
+            border-radius: 8px;
+            transition: background-color 0.2s;
+        }
+
+        li:hover {
+            background-color: #e2e6ea;
+        }
+
+        input[type="radio"] {
+            margin-right: 10px;
+        }
+
+        /* Submit button styling */
+        button {
+            background-color: #007BFF;
+            color: #fff;
+            border: none;
+            padding: 12px 20px;
+            border-radius: 8px;
+            cursor: pointer;
+            width: 100%;
+            font-size: 16px;
+            margin-top: 20px;
+            transition: background-color 0.3s;
+        }
+
+        button:hover {
+            background-color: #0056b3;
+        }
+
+        /* Back link styling */
+        a {
+            display: block;
+            text-align: center;
+            margin-top: 20px;
+            color: #007BFF;
+            text-decoration: none;
+            font-weight: bold;
+        }
+
+        a:hover {
+            text-decoration: underline;
+        }
+
+        /* Message when no slots are available */
+        p {
+            text-align: center;
+            color: #555;
+            font-style: italic;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h2>Book Appointment with Dr. {{ doctor.doctor_user.username }}</h2>
+
+        <form method="POST">
+            {% csrf_token %}
+
+            {% for avail in availability %}
+                <h3>Date: {{ avail.date }}</h3>
+                <ul>
+                    {% if avail.slot_1 %}
+                        <li>
+                            <input type="radio" name="slot" value="{{ avail.availability_id }}_1" required>
+                            Slot 1: {{ avail.slot_1_start }} - {{ avail.slot_1_end }}
+                        </li>
+                    {% endif %}
+                    {% if avail.slot_2 %}
+                        <li>
+                            <input type="radio" name="slot" value="{{ avail.availability_id }}_2">
+                            Slot 2: {{ avail.slot_2_start }} - {{ avail.slot_2_end }}
+                        </li>
+                    {% endif %}
+                    {% if avail.slot_3 %}
+                        <li>
+                            <input type="radio" name="slot" value="{{ avail.availability_id }}_3">
+                            Slot 3: {{ avail.slot_3_start }} - {{ avail.slot_3_end }}
+                        </li>
+                    {% endif %}
+                    {% if avail.slot_4 %}
+                        <li>
+                            <input type="radio" name="slot" value="{{ avail.availability_id }}_4">
+                            Slot 4: {{ avail.slot_4_start }} - {{ avail.slot_4_end }}
+                        </li>
+                    {% endif %}
+                    {% if avail.slot_5 %}
+                        <li>
+                            <input type="radio" name="slot" value="{{ avail.availability_id }}_5">
+                            Slot 5: {{ avail.slot_5_start }} - {{ avail.slot_5_end }}
+                        </li>
+                    {% endif %}
+                </ul>
+            {% empty %}
+                <p>No available slots.</p>
+            {% endfor %}
+
+            <button type="submit">Book Appointment</button>
+        </form>
+
+        <a href="{% url 'patient_dashboard' %}">Back to Dashboard</a>
+    </div>
+</body>
+</html>
+

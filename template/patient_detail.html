@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Doctor Dashboard</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #e6f0ff; /* Light blue background */
+            margin: 0;
+            padding: 0;
+        }
+
+        .container {
+            max-width: 900px;
+            margin: 40px auto;
+            padding: 30px 40px;
+            background-color: #fff;
+            border-radius: 12px;
+            box-shadow: 0 6px 15px rgba(0,0,0,0.1);
+        }
+
+        h2 {
+            text-align: center;
+            color: #004080; /* Dark blue */
+            margin-bottom: 30px;
+        }
+
+        h3 {
+            color: #0073e6; /* Medium blue */
+            border-bottom: 2px solid #0073e6;
+            padding-bottom: 5px;
+            margin-top: 40px;
+        }
+
+        form label {
+            display: block;
+            margin-bottom: 10px;
+            color: #004080;
+            font-weight: bold;
+        }
+
+        form input[type="date"] {
+            padding: 8px 10px;
+            margin-bottom: 15px;
+            border-radius: 6px;
+            border: 1px solid #ccc;
+            width: 100%;
+            box-sizing: border-box;
+        }
+
+        form input[type="checkbox"] {
+            margin-right: 10px;
+        }
+
+        form button {
+            background-color: #0073e6;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 16px;
+            margin-top: 15px;
+            transition: background-color 0.3s;
+        }
+
+        form button:hover {
+            background-color: #0059b3;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+
+        table th, table td {
+            padding: 12px 15px;
+            text-align: center;
+            border: 1px solid #ddd;
+            font-size: 14px;
+        }
+
+        table th {
+            background-color: #004080;
+            color: white;
+        }
+
+        table tr:nth-child(even) {
+            background-color: #cce0ff;
+        }
+
+        table tr:hover {
+            background-color: #99c2ff;
+        }
+
+        a.edit-link, a.patient-link {
+            text-decoration: none;
+            color: white;
+            background-color: #0073e6;
+            padding: 5px 10px;
+            border-radius: 5px;
+            transition: background-color 0.3s;
+        }
+
+        a.edit-link:hover, a.patient-link:hover {
+            background-color: #0059b3;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h2>Manage Your Slots</h2>
+
+    <!-- Form to add new slots -->
+    <form method="POST">
+        {% csrf_token %}
+        
+        <label for="date">Date:</label>
+        <input type="date" name="date" required>
+
+        <label><input type="checkbox" name="slot_1"> Slot 1 (9:00-10:00)</label>
+        <label><input type="checkbox" name="slot_2"> Slot 2 (10:00-11:00)</label>
+        <label><input type="checkbox" name="slot_3"> Slot 3 (11:00-12:00)</label>
+        <label><input type="checkbox" name="slot_4"> Slot 4 (1:00-2:00)</label>
+        <label><input type="checkbox" name="slot_5"> Slot 5 (2:00-3:00)</label>
+
+        <button type="submit">Save Slots</button>
+    </form>
+
+    <h3>Existing Slots</h3>
+
+   <table cellpadding="5" cellspacing="0">
+    <tr>
+        <th>Date</th>
+        <th>Slot 1</th>
+        <th>Slot 2</th>
+        <th>Slot 3</th>
+        <th>Slot 4</th>
+        <th>Slot 5</th>
+    </tr>
+
+    {% for avail in availabilities %}
+    <tr>
+        <td>{{ avail.date }}</td>
+
+        {% for i in "12345" %}
+            {% with key=avail.date|stringformat:"s"|add:"-"|add:i %}
+                {% if appointment_dict.key %}
+                    <td>
+                        <a href="{% url 'patient_detail' appointment_dict.key.patient.id %}">
+                            {{ appointment_dict.key.patient.username }}
+                        </a>
+                    </td>
+                {% else %}
+                    <td>Available</td>
+                {% endif %}
+            {% endwith %}
+        {% endfor %}
+
+    </tr>
+    {% empty %}
+    <tr>
+        <td colspan="6">No slots added yet.</td>
+    </tr>
+    {% endfor %}
+</table>
+
+</div>
+
+</body>
+</html>

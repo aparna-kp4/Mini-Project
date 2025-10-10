@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Edit Availability</title>
+    <style>
+        /* General page styling */
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #e6f0ff; /* Light blue background */
+            margin: 0;
+            padding: 0;
+            display: flex;
+            justify-content: center;
+            min-height: 100vh;
+        }
+
+        .container {
+            background-color: #fff;
+            padding: 30px 40px;
+            margin: 50px 0;
+            border-radius: 12px;
+            box-shadow: 0 6px 15px rgba(0,0,0,0.1);
+            width: 90%;
+            max-width: 500px;
+        }
+
+        h2 {
+            text-align: center;
+            color: #004080; /* Dark blue */
+            margin-bottom: 20px;
+        }
+
+        /* Error message styling */
+        p {
+            color: red;
+            text-align: center;
+            margin-bottom: 15px;
+        }
+
+        /* Form styling */
+        form label {
+            display: block;
+            margin-bottom: 10px;
+            color: #004080;
+            font-weight: bold;
+        }
+
+        form input[type="date"] {
+            width: 100%;
+            padding: 8px 10px;
+            margin-bottom: 15px;
+            border-radius: 6px;
+            border: 1px solid #ccc;
+            box-sizing: border-box;
+        }
+
+        form input[type="checkbox"] {
+            margin-right: 10px;
+        }
+
+        form input[type="submit"] {
+            background-color: #0073e6; /* Blue button */
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 16px;
+            width: 100%;
+            transition: background-color 0.3s;
+        }
+
+        form input[type="submit"]:hover {
+            background-color: #0059b3; /* Darker blue on hover */
+        }
+
+        /* Checkbox container spacing */
+        .checkbox-group {
+            margin-bottom: 20px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h2>Edit Availability</h2>
+
+        {% if error %}
+            <p>{{ error }}</p>
+        {% endif %}
+
+        <form action="{% url 'edit_availability' availability.availability_id %}" method="post">
+            {% csrf_token %}
+            
+
+            <div class="checkbox-group">
+                <label><input type="checkbox" name="slot_1" {% if availability.slot_1 %}checked{% endif %}> 9:00 - 10:00</label>
+                <label><input type="checkbox" name="slot_2" {% if availability.slot_2 %}checked{% endif %}> 10:00 - 11:00</label>
+                <label><input type="checkbox" name="slot_3" {% if availability.slot_3 %}checked{% endif %}> 11:00 - 12:00</label>
+                <label><input type="checkbox" name="slot_4" {% if availability.slot_4 %}checked{% endif %}> 1:00 - 2:00</label>
+                <label><input type="checkbox" name="slot_5" {% if availability.slot_5 %}checked{% endif %}> 2:00 - 3:00</label>
+            </div>
+
+            <input type="submit" value="Update">
+        </form>
+    </div>
+</body>
+</html>
+
+
+

@@ -1,0 +1,261 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Doctor Dashboard</title>
+    <style>
+        /* ====== General Styles ====== */
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #e6f0ff;
+            margin: 0;
+            padding: 0;
+        }
+
+        .container {
+            max-width: 1000px;
+            margin: 40px auto;
+            padding: 30px 40px;
+            background-color: #ffffff;
+            border-radius: 12px;
+            box-shadow: 0 6px 15px rgba(0,0,0,0.1);
+        }
+
+        h2, h3, h4 {
+            color: #003366;
+        }
+
+        h2 {
+            text-align: center;
+            margin-bottom: 25px;
+        }
+
+        h3 {
+            border-bottom: 2px solid #0059b3;
+            padding-bottom: 6px;
+            margin-top: 40px;
+        }
+
+        /* ====== Form Styling ====== */
+        form {
+            background-color: #f8faff;
+            padding: 20px;
+            border-radius: 10px;
+            border: 1px solid #cce0ff;
+        }
+
+        form label {
+            display: block;
+            margin-bottom: 8px;
+            color: #003366;
+            font-weight: bold;
+        }
+
+        form input[type="date"] {
+            padding: 8px 10px;
+            margin-bottom: 15px;
+            border-radius: 6px;
+            border: 1px solid #ccc;
+            width: 100%;
+            box-sizing: border-box;
+            font-size: 15px;
+        }
+
+        form input[type="checkbox"] {
+            margin-right: 8px;
+        }
+
+        form button {
+            background-color: #0059b3;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 16px;
+            margin-top: 10px;
+            transition: background-color 0.3s;
+        }
+
+        form button:hover {
+            background-color: #003366;
+        }
+
+        /* ====== Table Styling ====== */
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+
+        table th, table td {
+            padding: 12px 15px;
+            text-align: center;
+            border: 1px solid #ccc;
+            font-size: 14px;
+        }
+
+        table th {
+            background-color: #003366;
+            color: white;
+        }
+
+        table tr:nth-child(even) {
+            background-color: #cce0ff;
+        }
+
+        table tr:hover {
+            background-color: #99c2ff;
+        }
+
+        /* ====== Status Styles ====== */
+        .available, .booked {
+            display: inline-block;
+            background-color: #e6f0ff;
+            color: #003366;
+            font-weight: bold;
+            border-radius: 6px;
+            padding: 6px 10px;
+            min-width: 80px;
+        }
+
+        .not-available {
+            color: #808080;
+            font-style: italic;
+        }
+
+        a {
+            text-decoration: none;
+            color: white;
+            background-color: #0059b3;
+            padding: 6px 12px;
+            border-radius: 6px;
+            font-size: 14px;
+            transition: background-color 0.3s;
+        }
+
+        a:hover {
+            background-color: #003366;
+        }
+
+        .back-link {
+            display: inline-block;
+            margin-top: 20px;
+            background-color: #0059b3;
+            color: #fff;
+            padding: 8px 14px;
+            border-radius: 6px;
+            transition: background-color 0.3s;
+        }
+
+        .back-link:hover {
+            background-color: #003366;
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                padding: 20px;
+            }
+
+            table th, table td {
+                font-size: 13px;
+                padding: 8px;
+            }
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+    <h2>Doctor Dashboard - Dr. {{ doctor.doctor_user.username }}</h2>
+
+    <!-- Appointment Management Table -->
+    <h3>Your Appointments</h3>
+    <table>
+        <tr>
+            <th>Patient</th>
+            <th>Date</th>
+            <th>Slot</th>
+            <th>Status</th>
+            <th>Action</th>
+        </tr>
+        {% for appointment in appointments %}
+        <tr>
+            <td>{{ appointment.patient.username }}</td>
+            <td>{{ appointment.appointment_date }}</td>
+            <td>{{ appointment.slot }}</td>
+            <td>{{ appointment.status }}</td>
+            <td>
+                <a href="{% url 'update_status' appointment.appointment_id %}">Update</a>
+            </td>
+        </tr>
+        {% empty %}
+        <tr>
+            <td colspan="5">No appointments yet.</td>
+        </tr>
+        {% endfor %}
+    </table>
+
+    <hr>
+
+    <!-- Slot Management Table -->
+    <h3>Manage Your Slots</h3>
+    <form method="POST">
+        {% csrf_token %}
+        <label for="date">Select Date:</label>
+        <input type="date" name="date" required>
+
+        <label><input type="checkbox" name="slot_1"> Slot 1 (9:00-10:00)</label>
+        <label><input type="checkbox" name="slot_2"> Slot 2 (10:00-11:00)</label>
+        <label><input type="checkbox" name="slot_3"> Slot 3 (11:00-12:00)</label>
+        <label><input type="checkbox" name="slot_4"> Slot 4 (1:00-2:00)</label>
+        <label><input type="checkbox" name="slot_5"> Slot 5 (2:00-3:00)</label>
+
+        <button type="submit">Save Slots</button>
+    </form>
+
+    <h3>Existing Slots</h3>
+    <table>
+        <tr>
+            <th>Date</th>
+            <th>Slot 1</th>
+            <th>Slot 2</th>
+            <th>Slot 3</th>
+            <th>Slot 4</th>
+            <th>Slot 5</th>
+            <th>Action</th>
+        </tr>
+        {% for avail in availabilities %}
+        <tr>
+            <td>{{ avail.available_date }}</td>
+            {% for s in avail.slots %}
+            <td>
+                {% if s.available %}
+                    {% if s.patient %}
+                        <span class="booked">{{ s.patient }}</span>
+                    {% else %}
+                        <span class="available">Available</span>
+                    {% endif %}
+                {% else %}
+                    <span class="not-available">Not Available</span>
+                {% endif %}
+            </td>
+            {% endfor %}
+            <td><a href="{% url 'edit_availability' avail.availability_id %}">Edit</a></td>
+        </tr>
+        {% empty %}
+        <tr>
+            <td colspan="7">No slots added yet.</td>
+        </tr>
+        {% endfor %}
+    </table>
+
+    <a href="{% url 'logout' %}" class="back-link">← Logout</a>
+</div>
+</body>
+</html>
+
+
+
+
+
+

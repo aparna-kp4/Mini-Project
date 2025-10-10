@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Update Appointment</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #e6f0ff;
+            margin: 0;
+            padding: 0;
+        }
+
+        .container {
+            max-width: 500px;
+            margin: 80px auto;
+            padding: 30px 40px;
+            background-color: #ffffff;
+            border-radius: 12px;
+            box-shadow: 0 6px 15px rgba(0,0,0,0.1);
+        }
+
+        h2 {
+            text-align: center;
+            color: #003366;
+            margin-bottom: 25px;
+        }
+
+        p {
+            color: #003366;
+            margin: 10px 0;
+            font-size: 15px;
+        }
+
+        form {
+            margin-top: 20px;
+            background-color: #f8faff;
+            padding: 20px;
+            border-radius: 10px;
+            border: 1px solid #cce0ff;
+        }
+
+        select {
+            width: 100%;
+            padding: 10px;
+            margin-bottom: 15px;
+            border-radius: 6px;
+            border: 1px solid #ccc;
+            font-size: 15px;
+        }
+
+        button {
+            background-color: #0059b3;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 16px;
+            width: 100%;
+            transition: background-color 0.3s;
+        }
+
+        button:hover {
+            background-color: #003366;
+        }
+
+        a.back-link {
+            display: inline-block;
+            margin-top: 20px;
+            text-decoration: none;
+            color: #ffffff;
+            background-color: #0059b3;
+            padding: 8px 14px;
+            border-radius: 6px;
+            text-align: center;
+            transition: background-color 0.3s;
+        }
+
+        a.back-link:hover {
+            background-color: #003366;
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+    <h2>Update Appointment Status</h2>
+
+    <p><strong>Patient:</strong> {{ appointment.patient.username }}</p>
+    <p><strong>Date:</strong> {{ appointment.appointment_date }}</p>
+    <p><strong>Current Status:</strong> {{ appointment.status }}</p>
+
+    <form method="POST">
+        {% csrf_token %}
+        <select name="status" required>
+            <option value="">--Select Status--</option>
+            <option value="Completed" {% if appointment.status == "Completed" %}selected{% endif %}>Completed</option>
+            <option value="Cancelled" {% if appointment.status == "Cancelled" %}selected{% endif %}>Cancelled</option>
+        </select>
+        <button type="submit">Update</button>
+    </form>
+
+    <a href="{% url 'doctor_dashboard' %}" class="back-link">← Back to Dashboard</a>
+</div>
+</body>
+</html>
+

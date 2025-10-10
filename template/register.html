@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Register</title>
+    <style>
+        /* ====== General Page Style ====== */
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #e6f0ff; /* Light blue background */
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+        }
+
+        /* ====== Register Box ====== */
+        .register-box {
+            background: white;
+            width: 360px;
+            padding: 35px 25px;
+            border-radius: 12px;
+            box-shadow: 0 6px 18px rgba(0, 0, 0, 0.1);
+            animation: fadeIn 0.8s ease;
+        }
+
+        h2 {
+            text-align: center;
+            color: #003366;
+            margin-bottom: 25px;
+            font-size: 24px;
+        }
+
+        /* ====== Labels and Inputs ====== */
+        label {
+            font-weight: bold;
+            color: #003366;
+            display: block;
+            margin-bottom: 5px;
+        }
+
+        input, select {
+            width: 100%;
+            padding: 10px;
+            margin-bottom: 15px;
+            border: 1px solid #ccc;
+            border-radius: 6px;
+            font-size: 14px;
+            box-sizing: border-box;
+        }
+
+        /* ====== Button ====== */
+        button {
+            width: 100%;
+            background-color: #0059b3;
+            color: white;
+            padding: 10px;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 16px;
+            transition: background-color 0.3s ease;
+        }
+
+        button:hover {
+            background-color: #003366;
+        }
+
+        /* ====== Message Display ====== */
+        p.message {
+            text-align: center;
+            color: red;
+            margin-bottom: 15px;
+        }
+
+        /* ====== Login Link ====== */
+        .login-link {
+            text-align: center;
+            margin-top: 15px;
+            font-weight: bold;
+        }
+
+        .login-link a {
+            color: #0059b3;
+            text-decoration: none;
+            transition: color 0.3s ease;
+        }
+
+        .login-link a:hover {
+            color: #003366;
+        }
+
+        /* ====== Subtle Animation ====== */
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(-15px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="register-box">
+        <h2>Register</h2>
+
+        {% if messages %}
+            {% for message in messages %}
+                <p class="message">{{ message }}</p>
+            {% endfor %}
+        {% endif %}
+
+        <form action="{% url 'registerr' %}" method="POST">
+            {% csrf_token %}
+
+            <label>Username:</label>
+            <input type="text" name="username" required>
+
+            <label>Password:</label>
+            <input type="password" name="password" required>
+
+            <label>Phone:</label>
+            <input type="text" name="phone" required>
+
+            <button type="submit">Register</button>
+        </form>
+
+        <p class="login-link">Already have an account? 
+            <a href="{% url 'login' %}">Login here</a>
+        </p>
+    </div>
+
+</body>
+</html>
+
+
+

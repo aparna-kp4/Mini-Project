@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Add Availability</title>
+</head>
+<body>
+<h2>Add Availability</h2>
+
+<form method="POST">
+    {% csrf_token %}
+    <label>Date:</label>
+    <input type="date" name="available_date" required><br>
+    <label>Start Time:</label>
+    <input type="time" name="start_time" required><br>
+    <label>End Time:</label>
+    <input type="time" name="end_time" required><br>
+
+    <button type="submit">Save</button>
+</form>
+
+<a href="{% url 'doctor_dashboard' %}">Back to Dashboard</a>
+</body>
+</html>
