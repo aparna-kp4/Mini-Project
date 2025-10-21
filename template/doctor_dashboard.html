@@ -36,6 +36,26 @@
             margin-top: 40px;
         }
 
+        /* ====== Top Bar ====== */
+        .top-bar {
+            display: flex;
+            justify-content: flex-end;
+            margin-bottom: 15px;
+        }
+
+        .logout-btn {
+            background-color: #004080;
+            color: white;
+            padding: 8px 15px;
+            border-radius: 6px;
+            text-decoration: none;
+            font-weight: bold;
+        }
+
+        .logout-btn:hover {
+            background-color: #003366;
+        }
+
         /* ====== Form Styling ====== */
         form {
             background-color: #f8faff;
@@ -166,7 +186,12 @@
 </head>
 <body>
 <div class="container">
-    <h2>Doctor Dashboard - Dr. {{ doctor.doctor_user.username }}</h2>
+    <!-- Top Right Logout Button -->
+    <div class="top-bar">
+        <a class="logout-btn" href="{% url 'logout' %}">Logout</a>
+    </div>
+
+    <h2>Doctor Dashboard - Dr. {{ doctor.doctor_user.first_name }}</h2>
 
     <!-- Appointment Management Table -->
     <h3>Your Appointments</h3>
@@ -180,7 +205,8 @@
         </tr>
         {% for appointment in appointments %}
         <tr>
-            <td>{{ appointment.patient.username }}</td>
+
+            <td>{{ appointment.patient.first_name }}</td>
             <td>{{ appointment.appointment_date }}</td>
             <td>{{ appointment.slot }}</td>
             <td>{{ appointment.status }}</td>
@@ -197,7 +223,7 @@
 
     <hr>
 
-    <!-- Slot Management Table -->
+    <!-- Slot Management Form -->
     <h3>Manage Your Slots</h3>
     <form method="POST">
         {% csrf_token %}
@@ -213,7 +239,26 @@
         <button type="submit">Save Slots</button>
     </form>
 
+    <!-- Date Filter Form -->
     <h3>Existing Slots</h3>
+    <form method="GET" id="filterForm" style="margin-bottom: 15px; background-color:#f8faff; padding:10px; border-radius:8px; border:1px solid #cce0ff;">
+        <label for="filter_date" style="font-weight:bold; color:#003366;">Filter by Date:</label>
+        <input type="date" name="filter_date" id="filter_date" value="{{ filter_date }}" 
+               style="padding:6px 8px; border-radius:6px; border:1px solid #ccc; margin-left:10px;">
+        <button type="submit" 
+                style="background-color:#0059b3; color:white; padding:6px 12px; border:none; border-radius:6px; margin-left:10px; cursor:pointer;">
+            Apply
+        </button>
+        {% if filter_date %}
+            <a href="{% url 'doctor_dashboard' %}" 
+               style="margin-left:10px; background-color:#808080; padding:6px 12px; border-radius:6px; color:white; text-decoration:none;">
+               Clear
+            </a>
+        {% endif %}
+    </form>
+
+    <!-- Slot Table -->
+    <div id="availabilities">
     <table>
         <tr>
             <th>Date</th>
@@ -225,7 +270,7 @@
             <th>Action</th>
         </tr>
         {% for avail in availabilities %}
-        <tr>
+        <tr id="avail-{{ avail.availability_id }}">
             <td>{{ avail.available_date }}</td>
             {% for s in avail.slots %}
             <td>
@@ -244,15 +289,38 @@
         </tr>
         {% empty %}
         <tr>
-            <td colspan="7">No slots added yet.</td>
+            <td colspan="7">No slots found for this date.</td>
         </tr>
         {% endfor %}
     </table>
+    </div>
 
-    <a href="{% url 'logout' %}" class="back-link">← Logout</a>
 </div>
+
+<script>
+    // Save scroll position in sessionStorage before navigating
+    window.addEventListener("beforeunload", function () {
+        sessionStorage.setItem("scrollPos", window.scrollY);
+    });
+
+    // Restore scroll position on load
+    window.addEventListener("load", function () {
+        const scrollPos = sessionStorage.getItem("scrollPos");
+        if (scrollPos) {
+            window.scrollTo(0, parseInt(scrollPos));
+            sessionStorage.removeItem("scrollPos");
+        }
+    });
+
+    // Optional: submit filter form with anchor to stay at top of availabilities
+    document.getElementById("filterForm").addEventListener("submit", function() {
+        location.hash = "availabilities";
+    });
+</script>
 </body>
 </html>
+
+
 
 
 

@@ -21,30 +21,86 @@ User = get_user_model()
 def index(request):
     return render(request,'index.html')
 
+
+
+from django.contrib import messages
+
 def registerr(request):
+    # ✅ Clear old messages when simply opening the register page (GET request only)
+    if request.method == "GET":
+        storage = messages.get_messages(request)
+        storage.used = True
+
     if request.method == "POST":
         username = request.POST['username']
         password = request.POST['password']
         phone = request.POST['phone']
+        first_name = request.POST['first_name']
+        last_name = request.POST['last_name']
+        age = request.POST['age']
+        address = request.POST['address']
 
-        # Check if username already exists
         if Customuser.objects.filter(username=username).exists():
-            # messages.error(request, "Username already taken. Please choose another.")
+            messages.error(request, "Username already taken.")
             return redirect('registerr')
 
-        # Create new user
         user = Customuser.objects.create_user(
             username=username,
             password=password,
             phone=phone,
+            first_name=first_name,
+            last_name=last_name,
+            age=age,
+            address=address,
             user_type="patient"
         )
 
         messages.success(request, "Registration successful! Please log in.")
         return redirect('login')
 
-    # Render the registration page
     return render(request, 'register.html')
+
+
+
+
+
+
+
+
+# def registerr(request):
+#     if request.method == "POST":
+#         username = request.POST['username']
+#         password = request.POST['password']
+#         phone = request.POST['phone']
+#         first_name = request.POST['first_name']
+#         last_name = request.POST['last_name']
+#         age = request.POST['age']
+#         address = request.POST['address']
+
+#         # ✅ Only check username uniqueness
+#         if Customuser.objects.filter(username=username).exists():
+#             messages.error(request, "Username already taken.")
+#             return redirect('registerr')
+
+#         # ❌ Removed phone uniqueness check
+
+#         user = Customuser.objects.create_user(
+#             username=username,
+#             password=password,
+#             phone=phone,
+#             first_name=first_name,
+#             last_name=last_name,
+#             age=age,
+#             address=address,
+#             user_type="patient"
+#         )
+
+#         messages.success(request, "Registration successful! Please log in.")
+#         return redirect('login')
+
+#     return render(request, 'register.html')
+
+
 
 
 
@@ -96,7 +152,8 @@ def get_item(dictionary, key):
 
 
 
-
+from django.contrib import messages
+from datetime import datetime
 
 def doctor_dashboard(request):
     if not request.user.is_authenticated:
@@ -109,43 +166,30 @@ def doctor_dashboard(request):
     if not doctor:
         return render(request, 'error.html', {'message': 'Doctor record not found for this user.'})
 
-    # ✅ Handle POST (save slots)
+    # === Handle POST for saving slots ===
     if request.method == "POST":
-        selected_date = request.POST.get('date')
-        if selected_date:
-            # Check if this date already has availability
-            # existing = Availability.objects.filter(doctor=doctor, date=selected_date).first()
-            existing = Availability.objects.filter(doctor=doctor, available_date=selected_date).first()
-
-            if existing:
-                # Update existing record instead of creating duplicate
-                existing.slot_1 = 'slot_1' in request.POST
-                existing.slot_2 = 'slot_2' in request.POST
-                existing.slot_3 = 'slot_3' in request.POST
-                existing.slot_4 = 'slot_4' in request.POST
-                existing.slot_5 = 'slot_5' in request.POST
-                existing.save()
-                messages.info(request, f"Updated availability for {selected_date}.")
-            else:
-                Availability.objects.create(
-                    doctor=doctor,
-                    # date=selected_date,
-                    available_date=selected_date,
-                    slot_1='slot_1' in request.POST,
-                    slot_2='slot_2' in request.POST,
-                    slot_3='slot_3' in request.POST,
-                    slot_4='slot_4' in request.POST,
-                    slot_5='slot_5' in request.POST,
-                )
-                messages.success(request, f"Added new availability for {selected_date}.")
+        date_str = request.POST.get('date')
+        if date_str:
+            slot_date = datetime.strptime(date_str, '%Y-%m-%d').date()
+            # Check if availability already exists
+            availability, created = Availability.objects.get_or_create(doctor=doctor, available_date=slot_date)
+            for i in range(1, 6):
+                setattr(availability, f'slot_{i}', f'slot_{i}' in request.POST)
+            availability.save()
+            messages.success(request, f"Slots for {slot_date} saved successfully.")
             return redirect('doctor_dashboard')
 
-    # ✅ Build data for the table
-    # availabilities = Availability.objects.filter(doctor=doctor).order_by('-date')
-    availabilities = Availability.objects.filter(doctor=doctor).order_by('-available_date')
+    # --- DATE FILTERING ---
+    filter_date = request.GET.get('filter_date')
+    if filter_date:
+        availabilities = Availability.objects.filter(doctor=doctor, available_date=filter_date)
+    else:
+        availabilities = Availability.objects.filter(doctor=doctor)
 
+    availabilities = availabilities.order_by('-available_date')
     appointments = Appointment.objects.filter(doctor=doctor)
 
+    # Prepare availability list for template
     avail_list = []
     for avail in availabilities:
         slots = []
@@ -153,9 +197,7 @@ def doctor_dashboard(request):
             slot_flag = getattr(avail, f"slot_{i}")
             patient_name = None
             if slot_flag:
-                # app = appointments.filter(appointment_date=avail.date, slot=str(i)).first()
                 app = appointments.filter(appointment_date=avail.available_date, slot=str(i)).first()
-
                 if app:
                     patient_name = app.patient.username
             slots.append({
@@ -164,7 +206,6 @@ def doctor_dashboard(request):
                 'slot_number': i
             })
         avail_list.append({
-            # 'date': avail.date,
             'available_date': avail.available_date,
             'slots': slots,
             'availability_id': avail.availability_id
@@ -174,7 +215,79 @@ def doctor_dashboard(request):
         'availabilities': avail_list,
         'doctor': doctor,
         'appointments': appointments,
+        'filter_date': filter_date
     })
+
+
+
+
+
+
+
+
+
+
+
+# from datetime import datetime
+
+# def doctor_dashboard(request):
+#     if not request.user.is_authenticated:
+#         return redirect('login')
+
+#     if request.user.user_type.lower() != "doctor":
+#         return redirect('dashboard')
+
+#     doctor = Doctor.objects.filter(doctor_user=request.user).first()
+#     if not doctor:
+#         return render(request, 'error.html', {'message': 'Doctor record not found for this user.'})
+
+#     # --- DATE FILTERING ---
+#     filter_date = request.GET.get('filter_date')
+#     if filter_date:
+#         availabilities = Availability.objects.filter(doctor=doctor, available_date=filter_date)
+#     else:
+#         availabilities = Availability.objects.filter(doctor=doctor)
+
+#     availabilities = availabilities.order_by('-available_date')
+#     appointments = Appointment.objects.filter(doctor=doctor)
+
+#     # (Keep your existing availability list code as it is...)
+#     avail_list = []
+#     for avail in availabilities:
+#         slots = []
+#         for i in range(1, 6):
+#             slot_flag = getattr(avail, f"slot_{i}")
+#             patient_name = None
+#             if slot_flag:
+#                 app = appointments.filter(appointment_date=avail.available_date, slot=str(i)).first()
+#                 if app:
+#                     patient_name = app.patient.username
+#             slots.append({
+#                 'available': slot_flag,
+#                 'patient': patient_name,
+#                 'slot_number': i
+#             })
+#         avail_list.append({
+#             'available_date': avail.available_date,
+#             'slots': slots,
+#             'availability_id': avail.availability_id
+#         })
+
+#     return render(request, 'doctor_dashboard.html', {
+#         'availabilities': avail_list,
+#         'doctor': doctor,
+#         'appointments': appointments,
+#         'filter_date': filter_date  # Pass it back for UI
+#     })
+
+
+
+
+
+
+
+
+
 
 
 
@@ -268,6 +381,7 @@ def add_availability(request):
 
 
 
+
 def patient_dashboard(request):
     if not request.user.is_authenticated:
         return redirect('login')
@@ -276,8 +390,10 @@ def patient_dashboard(request):
     appointments = Appointment.objects.filter(patient=request.user)
     today = date.today()
 
-    # Get all dates the patient already booked
-    booked_dates = appointments.values_list('appointment_date', flat=True)
+    # Dates already booked per doctor
+    booked_dict = {}
+    for app in appointments:
+        booked_dict.setdefault(app.doctor_id, []).append(app.appointment_date)
 
     doctor_slots = {}
 
@@ -293,72 +409,66 @@ def patient_dashboard(request):
                 {'number': 4, 'available': avail.slot_4},
                 {'number': 5, 'available': avail.slot_5},
             ]
+
+            # Determine if patient can book (only 1 per doctor per day)
+            already_booked = avail.available_date in booked_dict.get(doctor.id, [])
             slots_list.append({
                 'availability_id': avail.availability_id,
                 'date': avail.available_date,
-                'slots': slots
+                'slots': slots,
+                'already_booked': already_booked
             })
         doctor_slots[doctor] = slots_list
 
     return render(request, 'patient_dashboard.html', {
         'appointments': appointments,
-        'doctor_slots': doctor_slots,
-        'booked_dates': booked_dates,
+        'doctor_slots': doctor_slots
     })
 
 
 
 
-# def book_appointment(request, doctor_id):
-#     doctor = Doctor.objects.get(pk=doctor_id)
-#     availability = Availability.objects.filter(doctor=doctor,available_date__gte=date.today())
+# def patient_dashboard(request):
+#     if not request.user.is_authenticated:
+#         return redirect('login')
 
-#     if request.method == "POST":
-#         selected = request.POST.get("slot")  # format: "<availability_id>_<slot_number>"
-#         if selected and "_" in selected:
-#             avail_id, slot_num = selected.split("_")
-#             if avail_id.isdigit() and slot_num.isdigit():
-#                 avail = Availability.objects.get(availability_id=int(avail_id))
-#                 slot_num = int(slot_num)
+#     doctors = Doctor.objects.all()
+#     appointments = Appointment.objects.filter(patient=request.user)
+#     today = date.today()
 
-#                 if slot_num == 1 and avail.slot_1:
-#                     avail.slot_1 = False
-#                 elif slot_num == 2 and avail.slot_2:
-#                     avail.slot_2 = False
-#                 elif slot_num == 3 and avail.slot_3:
-#                     avail.slot_3 = False
-#                 elif slot_num == 4 and avail.slot_4:
-#                     avail.slot_4 = False
-#                 elif slot_num == 5 and avail.slot_5:
-#                     avail.slot_5 = False
-#                 else:
-#                     messages.error(request, "Slot already booked or invalid.")
-#                     return redirect('book_appointment', doctor_id=doctor_id)
+#     # Get all dates the patient already booked
+#     booked_dates = appointments.values_list('appointment_date', flat=True)
 
-#                 avail.save()
+#     doctor_slots = {}
 
-#                 # Create appointment
-#                 Appointment.objects.create(
-#                     patient=request.user,
-#                     doctor=doctor,
-#                     # appointment_date=avail.date,
-#                     appointment_date=avail.available_date,
-#                     slot=str(slot_num),
-#                     status="Pending"
-#                 )
-#                 # messages.success(request, f"Appointment booked with {doctor} on {avail.date}, Slot {slot_num}")
-#                 messages.success(request, f"Appointment booked with {doctor} on {avail.available_date}, Slot {slot_num}")
+#     for doctor in doctors:
+#         slots_list = []
+#         availabilities = Availability.objects.filter(doctor=doctor, available_date__gte=today).order_by('available_date')
 
-#                 return redirect('patient_dashboard')
-#             else:
-#                 messages.error(request, "Invalid slot selection.")
-#         else:
-#             messages.error(request, "No slot selected.")
+#         for avail in availabilities:
+#             slots = [
+#                 {'number': 1, 'available': avail.slot_1},
+#                 {'number': 2, 'available': avail.slot_2},
+#                 {'number': 3, 'available': avail.slot_3},
+#                 {'number': 4, 'available': avail.slot_4},
+#                 {'number': 5, 'available': avail.slot_5},
+#             ]
+#             slots_list.append({
+#                 'availability_id': avail.availability_id,
+#                 'date': avail.available_date,
+#                 'slots': slots
+#             })
+#         doctor_slots[doctor] = slots_list
 
-#     return render(request, 'book_appointment.html', {
-#         'doctor': doctor,
-#         'availability': availability
+#     return render(request, 'patient_dashboard.html', {
+#         'appointments': appointments,
+#         'doctor_slots': doctor_slots,
+#         'booked_dates': booked_dates,
 #     })
+
+
+
+
 
 
 def book_appointment(request, doctor_id):

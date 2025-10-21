@@ -5,6 +5,10 @@ from django.utils import timezone
 class Customuser(AbstractUser):
     user_type = models.CharField(max_length=100)
     phone = models.CharField(max_length=15)
+    age = models.IntegerField(null=True, blank=True)   
+    
+    address = models.TextField(null=True, blank=True)  
+
 
     def save(self, *args, **kwargs):
         if not self.password.startswith('pbkdf2_'):
@@ -18,7 +22,6 @@ class Doctor(models.Model):
 
     def __str__(self):
         return f"Dr. {self.doctor_user.username}"
-
 
 class Availability(models.Model):
     availability_id = models.AutoField(primary_key=True)
@@ -47,7 +50,8 @@ class Availability(models.Model):
     slot_5_end = models.TimeField(default="15:00")
 
     def __str__(self):
-        return f"{self.doctor} - {self.date}"
+        return f"{self.doctor} - {self.available_date}"  # ✅ corrected
+
 
 
 class Appointment(models.Model):

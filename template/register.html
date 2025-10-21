@@ -1,12 +1,14 @@
 <!DOCTYPE html>
 <html>
+
 <head>
     <title>Register</title>
     <style>
         /* ====== General Page Style ====== */
         body {
             font-family: Arial, sans-serif;
-            background-color: #e6f0ff; /* Light blue background */
+            background-color: #e6f0ff;
+            /* Light blue background */
             display: flex;
             justify-content: center;
             align-items: center;
@@ -39,7 +41,8 @@
             margin-bottom: 5px;
         }
 
-        input, select {
+        input,
+        select {
             width: 100%;
             padding: 10px;
             margin-bottom: 15px;
@@ -92,25 +95,37 @@
 
         /* ====== Subtle Animation ====== */
         @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(-15px); }
-            to { opacity: 1; transform: translateY(0); }
+            from {
+                opacity: 0;
+                transform: translateY(-15px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
         }
     </style>
 </head>
+
 <body>
 
     <div class="register-box">
         <h2>Register</h2>
 
-        {% if messages %}
-            {% for message in messages %}
-                <p class="message">{{ message }}</p>
-            {% endfor %}
-        {% endif %}
-
         <form action="{% url 'registerr' %}" method="POST">
             {% csrf_token %}
+            <label>First Name:</label>
+            <input type="text" name="first_name" required>
 
+            <label>Last Name:</label>
+            <input type="text" name="last_name" required>
+
+            <label>Age:</label>
+            <input type="number" name="age" required>
+
+            <label>Address:</label>
+            <input type="text" name="address" required>
             <label>Username:</label>
             <input type="text" name="username" required>
 
@@ -119,17 +134,17 @@
 
             <label>Phone:</label>
             <input type="text" name="phone" required>
+            
+
 
             <button type="submit">Register</button>
         </form>
 
-        <p class="login-link">Already have an account? 
+        <p class="login-link">Already have an account?
             <a href="{% url 'login' %}">Login here</a>
         </p>
     </div>
 
 </body>
+
 </html>
-
-
-

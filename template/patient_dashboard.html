@@ -1,98 +1,192 @@
 <!DOCTYPE html>
 <html>
+
 <head>
-    <title>Patient Dashboard</title>
-    <style>
-        body { font-family: Arial; background-color: #e6f0ff; margin:0; padding:0; }
-        .container { max-width:1000px; margin:40px auto; padding:20px 30px; background:#fff; border-radius:10px; box-shadow:0 4px 15px rgba(0,0,0,0.1); }
-        h2 { text-align:center; color:#004080; margin-bottom:20px; }
-        h3 { color:#0073e6; border-bottom:2px solid #0073e6; padding-bottom:5px; margin-top:40px; }
-        h4 { color:#004080; margin-top:25px; }
-        table { width:100%; border-collapse: collapse; margin-bottom:30px; }
-        table th, table td { padding:10px 12px; text-align:center; border:1px solid #ddd; }
-        table th { background-color:#004080; color:white; }
-        table tr:nth-child(even) { background-color:#cce0ff; }
-        table tr:hover { background-color:#99c2ff; }
-        .book-link { background-color:#0073e6; border:none; color:white; padding:6px 12px; border-radius:5px; cursor:pointer; font-size:14px; }
-        .book-link:hover { background-color:#0059b3; }
-        a.back-link { display:inline-block; margin-top:20px; text-decoration:none; color:#004080; font-weight:bold; }
-        a.back-link:hover { text-decoration:underline; }
-        p.no-slots { color:#004080; font-style:italic; }
-        td form { margin:0; }
-        .disabled-slot { color: #888; font-style: italic; }
-    </style>
+  <title>Patient Dashboard</title>
+  <style>
+    body {
+      font-family: Arial;
+      background: #e6f0ff;
+      margin: 0;
+      padding: 0;
+    }
+
+    .container {
+      max-width: 1000px;
+      margin: 40px auto;
+      padding: 20px 30px;
+      background: #fff;
+      border-radius: 10px;
+      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+    }
+
+    .top-bar {
+      display: flex;
+      justify-content: flex-end;
+      margin-bottom: 10px;
+    }
+
+    .logout-btn {
+      background: #004080;
+      color: white;
+      padding: 8px 15px;
+      border-radius: 6px;
+      text-decoration: none;
+      font-weight: bold;
+    }
+
+    .logout-btn:hover {
+      background: #004080;
+    }
+
+    h2 {
+      text-align: center;
+      color: #004080;
+      margin-bottom: 20px;
+    }
+
+    h3 {
+      color: #0073e6;
+      border-bottom: 2px solid #0073e6;
+      padding-bottom: 5px;
+      margin-top: 40px;
+    }
+
+    h4 {
+      color: #004080;
+      margin-top: 25px;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-bottom: 30px;
+    }
+
+    table th,
+    table td {
+      padding: 10px 12px;
+      text-align: center;
+      border: 1px solid #ddd;
+    }
+
+    table th {
+      background: #004080;
+      color: white;
+    }
+
+    table tr:nth-child(even) {
+      background: #cce0ff;
+    }
+
+    table tr:hover {
+      background: #99c2ff;
+    }
+
+    .book-link {
+      background: #0073e6;
+      border: none;
+      color: white;
+      padding: 6px 12px;
+      border-radius: 5px;
+      cursor: pointer;
+      font-size: 14px;
+    }
+
+    .book-link:hover {
+      background: #0059b3;
+    }
+
+    p.no-slots {
+      color: #004080;
+      font-style: italic;
+    }
+
+    td form {
+      margin: 0;
+    }
+
+    .disabled-slot {
+      color: #888;
+      font-style: italic;
+    }
+  </style>
 </head>
+
 <body>
-    <div class="container">
-        <h2>Welcome {{ request.user.username }}</h2>
+  <div class="container" id="patient-container">
+    <div class="top-bar"><a class="logout-btn" href="{% url 'logout' %}">Logout</a></div>
 
-        <h3>Your Appointments</h3>
-        <table>
-            <tr>
-                <th>Doctor</th>
-                <th>Date</th>
-                <th>Slot</th>
-                <th>Status</th>
-            </tr>
-            {% for appointment in appointments %}
-            <tr>
-                <td>{{ appointment.doctor.doctor_user.username }}</td>
-                <td>{{ appointment.appointment_date }}</td>
-                <td>{{ appointment.slot }}</td>
-                <td>{{ appointment.status }}</td>
-            </tr>
-            {% empty %}
-            <tr>
-                <td colspan="4">No appointments yet.</td>
-            </tr>
-            {% endfor %}
-        </table>
+    <h2>Welcome {{ request.user.first_name }}</h2>
 
-        <hr>
+    <h3>Your Appointments</h3>
+    <table>
+      <tr>
+        <th>Doctor</th>
+        <th>Date</th>
+        <th>Slot</th>
+        <th>Status</th>
+      </tr>
+      {% for appointment in appointments %}
+      <tr>
+        <td>{{ appointment.doctor.doctor_user.first_name }}</td>
+        <td>{{ appointment.appointment_date }}</td>
+        <td>{{ appointment.slot }}</td>
+        <td>{{ appointment.status }}</td>
+      </tr>
+      {% empty %}
+      <tr>
+        <td colspan="4">No appointments yet.</td>
+      </tr>
+      {% endfor %}
+    </table>
 
-        <h3>Doctor Availability</h3>
-        {% for doctor, availabilities in doctor_slots.items %}
-            <h4>Dr. {{ doctor.doctor_user.username }} - {{ doctor.specialization }}</h4>
-            {% if availabilities %}
-                <table>
-                    <tr>
-                        <th>Date</th>
-                        <th>Slot 1</th>
-                        <th>Slot 2</th>
-                        <th>Slot 3</th>
-                        <th>Slot 4</th>
-                        <th>Slot 5</th>
-                    </tr>
-                    {% for avail in availabilities %}
-                    <tr>
-                        <td>{{ avail.date }}</td>
-                        {% for slot in avail.slots %}
-                            <td>
-                                {% if slot.available and avail.date not in booked_dates %}
-                                    <form action="{% url 'book_appointment' doctor_id=doctor.pk %}" method="post">
-                                        {% csrf_token %}
-                                        <input type="hidden" name="slot" value="{{ avail.availability_id }}_{{ slot.number }}">
-                                        <button type="submit" class="book-link">Book</button>
-                                    </form>
-                                {% else %}
-                                    <span class="disabled-slot">Booked</span>
-                                {% endif %}
-                            </td>
-                        {% endfor %}
-                    </tr>
-                    {% endfor %}
-                </table>
-            {% else %}
-                <p class="no-slots">No available slots.</p>
-            {% endif %}
+    <h3>Doctor Availability</h3>
+    {% for doctor, availabilities in doctor_slots.items %}
+    <h4>Dr. {{ doctor.doctor_user.first_name }} {{ doctor.doctor_user.last_name }} - {{ doctor.specialization }}</h4>
+    {% if availabilities %}
+    <table>
+      <tr>
+        <th>Date</th>
+        <th>Slot 1</th>
+        <th>Slot 2</th>
+        <th>Slot 3</th>
+        <th>Slot 4</th>
+        <th>Slot 5</th>
+      </tr>
+      {% for avail in availabilities %}
+      <tr id="avail-{{ avail.availability_id }}">
+        <td>{{ avail.date }}</td>
+        {% for slot in avail.slots %}
+        <td>
+          {% if slot.available and not avail.already_booked %}
+          <form action="{% url 'book_appointment' doctor_id=doctor.pk %}" method="post">
+            {% csrf_token %}
+            <input type="hidden" name="slot" value="{{ avail.availability_id }}_{{ slot.number }}">
+            <button type="submit" class="book-link">Book</button>
+          </form>
+          {% else %}
+          <span class="disabled-slot">Booked</span>
+          {% endif %}
+        </td>
         {% endfor %}
+      </tr>
+      {% endfor %}
+    </table>
+    {% else %}
+    <p class="no-slots">No available slots.</p>
+    {% endif %}
+    {% endfor %}
+  </div>
 
-        <a class="back-link" href="{% url 'logout' %}">Logout</a>
-    </div>
+  <script>
+    // Scroll retention
+    window.addEventListener("beforeunload", function () { sessionStorage.setItem("scrollPos", window.scrollY); });
+    window.addEventListener("load", function () {
+      const scrollPos = sessionStorage.getItem("scrollPos");
+      if (scrollPos) { window.scrollTo(0, parseInt(scrollPos)); sessionStorage.removeItem("scrollPos"); }
+    });
+  </script>
 </body>
+
 </html>
-
-
-
-
-
